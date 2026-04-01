@@ -4,19 +4,23 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building project...'
+                sh 'mvn clean install'
             }
         }
 
-        stage('Test') {
+        stage('Verify Artifact') {
             steps {
-                echo 'Testing project...'
+                sh 'ls -l target/'
             }
         }
 
-        stage('Deploy') {
+        stage('Run Ansible') {
             steps {
-                echo 'Deploying project...'
+                sh '''
+                ansible-playbook /home/jenkins/ansible/send-artifact.yml \
+                -i /home/jenkins/ansible/hosts \
+                --extra-vars "artifact_path=$WORKSPACE/target/demo.war"
+                '''
             }
         }
     }
